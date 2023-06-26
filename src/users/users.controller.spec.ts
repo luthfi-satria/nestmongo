@@ -1,0 +1,128 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
+import { ResponseService } from '../response/response.service';
+import { MessageService } from '../message/message.service';
+import { CreateUsersDto, UpdateUserDto } from './dto/users.dto';
+import { UsersDocument } from '../database/entities/users.entity';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
+import mongoose from 'mongoose';
+
+describe('UsersController', () => {
+  let userController: UsersController;
+  const mockUsersService = {
+    findOne: jest.fn(),
+    findAll: jest.fn(),
+    register: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+  };
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [],
+      controllers: [UsersController],
+      providers: [
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
+        },
+        ResponseService,
+        MessageService,
+      ],
+    }).compile();
+
+    userController = module.get<UsersController>(UsersController);
+  });
+
+  // UNIT TEST - CONTROLLER EXISTENCE
+  it('controller should be defined', () => {
+    expect(userController).toBeDefined();
+  });
+
+  // UNIT TEST - VALIDATION OF DTO
+  it('register validation => user registration should be failed', async () => {
+    const createUsersDto: CreateUsersDto = {
+      email: '',
+      name: '',
+      password: '',
+      phone: '',
+      username: '',
+    } as CreateUsersDto;
+
+    const plainUsersDto = plainToInstance(CreateUsersDto, createUsersDto);
+    const error = await validate(plainUsersDto);
+
+    expect(error.length).not.toBe(0);
+  });
+
+  // UNIT TEST - REGISTRATION USER
+  it('register => user should be successfully registered', async () => {
+    const createUsersDto: CreateUsersDto = {
+      email: 'test@email.com',
+      name: 'test name',
+      password: 'test password',
+      phone: '12345678',
+      username: 'test_username',
+    } as CreateUsersDto;
+
+    const userData = {
+      email: 'test@email.com',
+      name: 'test name',
+      password: 'test password',
+      phone: '12345678',
+      username: 'test_username',
+    } as Partial<UsersDocument>;
+
+    jest.spyOn(mockUsersService, 'register').mockReturnValue(userData);
+    const result = await userController.register(createUsersDto);
+    expect(mockUsersService.register).toBeCalled();
+    expect(mockUsersService.register).toBeCalledWith(createUsersDto);
+
+    expect(result).toEqual(userData);
+  });
+
+  // UNIT TEST - GET USER DETAIL
+  it('detail => user detail should be fetch', async () => {
+    const id = new mongoose.Types.ObjectId('64999711d4831a2711cfbbb8');
+    const userData = {
+      id: new mongoose.Types.ObjectId('64999711d4831a2711cfbbb8'),
+      email: 'test@email.com',
+      name: 'test name',
+      password: 'test password',
+      phone: '12345678',
+      username: 'test_username',
+    } as Partial<UsersDocument>;
+    jest.spyOn(mockUsersService, 'findOne').mockReturnValue(userData);
+    const result = await userController.detail(id);
+
+    expect(result).toEqual(userData);
+    expect(mockUsersService.findOne).toBeCalled();
+    expect(mockUsersService.findOne).toBeCalledWith({ id: id });
+  });
+
+  // UNIT TEST - UPDATE USER DETAIL
+  it('update => user profile should be updated', async () => {
+    const id = new mongoose.Types.ObjectId('64999711d4831a2711cfbbb8');
+    const updateUserDto = {
+      name: 'new test',
+      phone: '234567889',
+    } as UpdateUserDto;
+
+    const userData = {
+      id: new mongoose.Types.ObjectId('64999711d4831a2711cfbbb8'),
+      email: 'newTest@email.com',
+      name: 'new test',
+      phone: '234567889',
+      password: 'test password',
+      username: 'test_username',
+    } as Partial<UsersDocument>;
+    jest.spyOn(mockUsersService, 'update').mockReturnValue(userData);
+    const result = await userController.update(id, updateUserDto);
+
+    expect(result).toEqual(userData);
+    expect(mockUsersService.update).toBeCalled();
+    expect(mockUsersService.update).toBeCalledWith(id, updateUserDto);
+  });
+});
