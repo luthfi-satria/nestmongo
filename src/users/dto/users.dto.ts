@@ -6,7 +6,17 @@ import {
   Length,
   ValidateIf,
 } from 'class-validator';
+import { UserType } from '../../hash/guard/interface/user.interface';
+import { Transform, Type } from 'class-transformer';
+import { Types } from 'mongoose';
+import { DBHelper } from '../../helper/database.helper';
 
+export class GetUserDetail {
+  @IsNotEmpty()
+  @Type(() => Types.ObjectId)
+  @Transform(({ value, key }) => DBHelper.toMongoObjectId({ value, key }))
+  id: string;
+}
 export class CreateUsersDto {
   @IsString()
   @IsNotEmpty()
@@ -29,6 +39,10 @@ export class CreateUsersDto {
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  user_type: UserType;
 }
 
 export class UpdateUserDto {
@@ -46,4 +60,8 @@ export class UpdateUserDto {
   @IsNumberString()
   @Length(10, 15)
   phone: string;
+
+  @IsString()
+  @IsNotEmpty()
+  user_type: UserType;
 }

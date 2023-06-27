@@ -1,7 +1,11 @@
 import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUsersDto, UpdateUserDto } from './dto/users.dto';
+import { CreateUsersDto, GetUserDetail, UpdateUserDto } from './dto/users.dto';
 import { ResponseStatusCode } from '../response/response.decorator';
+import { UserType } from '../hash/guard/user-type.decorator';
+import { AuthJwtGuard } from '../auth/auth.decorator';
+import { User } from '../auth/auth.decorator';
+import { DBHelper } from '../helper/database.helper';
 // import { AuthJwtGuard } from 'src/auth/auth.decorator';
 // import { UserType } from 'src/hash/guard/user-type.decorator';
 
@@ -18,11 +22,24 @@ export class UsersController {
 
   @Get(':id')
   @ResponseStatusCode()
-  async detail(@Param('id') id) {
-    return this.userService.findOne({ id: id });
+  @UserType('admin')
+  @AuthJwtGuard()
+  async detail(@Param() user: GetUserDetail) {
+    return this.userService.findOne({ _id: user.id });
+  }
+
+  @Get('')
+  @ResponseStatusCode()
+  @UserType('admin', 'user')
+  @AuthJwtGuard()
+  async profile(@User() user: any) {
+    const id = DBHelper.NewObjectID(user.id);
+    return this.userService.findOne({ _id: id });
   }
 
   @Put(':id')
+  @UserType('admin', 'user')
+  @AuthJwtGuard()
   @ResponseStatusCode()
   async update(@Param('id') id, @Body() body: UpdateUserDto) {
     return this.userService.update(id, body);

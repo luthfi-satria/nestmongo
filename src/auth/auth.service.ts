@@ -3,7 +3,6 @@ import { compare } from 'bcrypt';
 import { HashService } from '../hash/hash.service';
 import { UsersService } from '../users/users.service';
 import { ResponseService } from '../response/response.service';
-import { Level } from '../hash/guard/interface/user.interface';
 import { RMessage } from '../response/response.interface';
 
 @Injectable()
@@ -37,9 +36,10 @@ export class AuthService {
 
     if (user && validate) {
       const payload = {
-        sub: user.id,
+        id: user.id,
         username: user.username,
-        level: Level.free,
+        email: user.email,
+        user_type: user.user_type,
       };
 
       return this.hashService.jwtSign(

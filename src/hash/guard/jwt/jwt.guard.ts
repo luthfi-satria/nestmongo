@@ -53,7 +53,6 @@ export class JwtGuard extends AuthGuard('jwt') {
       throw new InternalServerErrorException(err);
     }
     const loggedInUser: User = user;
-
     if (!loggedInUser) {
       let error_message = ['Invalid token'];
       if (info instanceof TokenExpiredError) {

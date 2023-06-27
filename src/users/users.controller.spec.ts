@@ -3,11 +3,12 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { ResponseService } from '../response/response.service';
 import { MessageService } from '../message/message.service';
-import { CreateUsersDto, UpdateUserDto } from './dto/users.dto';
+import { CreateUsersDto, GetUserDetail, UpdateUserDto } from './dto/users.dto';
 import { UsersDocument } from '../database/entities/users.entity';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import mongoose from 'mongoose';
+import { UserType } from '../hash/guard/interface/user.interface';
 
 describe('UsersController', () => {
   let userController: UsersController;
@@ -65,6 +66,7 @@ describe('UsersController', () => {
       password: 'test password',
       phone: '12345678',
       username: 'test_username',
+      user_type: UserType.User,
     } as CreateUsersDto;
 
     const userData = {
@@ -73,6 +75,7 @@ describe('UsersController', () => {
       password: 'test password',
       phone: '12345678',
       username: 'test_username',
+      user_type: UserType.User,
     } as Partial<UsersDocument>;
 
     jest.spyOn(mockUsersService, 'register').mockReturnValue(userData);
@@ -85,7 +88,9 @@ describe('UsersController', () => {
 
   // UNIT TEST - GET USER DETAIL
   it('detail => user detail should be fetch', async () => {
-    const id = new mongoose.Types.ObjectId('64999711d4831a2711cfbbb8');
+    const user: GetUserDetail = {
+      id: '64999711d4831a2711cfbbb8',
+    };
     const userData = {
       id: new mongoose.Types.ObjectId('64999711d4831a2711cfbbb8'),
       email: 'test@email.com',
@@ -95,11 +100,11 @@ describe('UsersController', () => {
       username: 'test_username',
     } as Partial<UsersDocument>;
     jest.spyOn(mockUsersService, 'findOne').mockReturnValue(userData);
-    const result = await userController.detail(id);
+    const result = await userController.detail(user);
 
     expect(result).toEqual(userData);
     expect(mockUsersService.findOne).toBeCalled();
-    expect(mockUsersService.findOne).toBeCalledWith({ id: id });
+    expect(mockUsersService.findOne).toBeCalledWith({ id: user.id });
   });
 
   // UNIT TEST - UPDATE USER DETAIL
@@ -108,6 +113,7 @@ describe('UsersController', () => {
     const updateUserDto = {
       name: 'new test',
       phone: '234567889',
+      user_type: UserType.User,
     } as UpdateUserDto;
 
     const userData = {
@@ -117,6 +123,7 @@ describe('UsersController', () => {
       phone: '234567889',
       password: 'test password',
       username: 'test_username',
+      user_type: UserType.User,
     } as Partial<UsersDocument>;
     jest.spyOn(mockUsersService, 'update').mockReturnValue(userData);
     const result = await userController.update(id, updateUserDto);

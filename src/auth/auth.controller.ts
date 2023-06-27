@@ -11,6 +11,7 @@ import { ResponseService } from '../response/response.service';
 import { MessageService } from '../message/message.service';
 import { AuthJwtGuard } from './auth.decorator';
 import { RMessage } from '../response/response.interface';
+import { ResponseStatusCode } from '../response/response.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -21,6 +22,7 @@ export class AuthController {
   ) {}
 
   @Post('login')
+  @ResponseStatusCode()
   async login(
     @Body()
     data: Record<string, any>,

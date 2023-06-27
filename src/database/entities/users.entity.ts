@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
+import { UserType } from '../../hash/guard/interface/user.interface';
 
 @Entity({ name: 'users' })
 export class UsersDocument {
@@ -24,6 +25,9 @@ export class UsersDocument {
 
   @Column()
   phone?: string;
+
+  @Column()
+  user_type?: UserType;
 
   @Column()
   password?: string;
