@@ -91,6 +91,18 @@ export class UsersService {
     return hash(password, salt);
   }
 
+  async profile(id) {
+    const getProfile = await this.findOne({ _id: id });
+    if (getProfile) {
+      return this.responseService.success(true, 'user profile', getProfile);
+    }
+    return this.responseService.error(HttpStatus.BAD_REQUEST, {
+      value: id,
+      property: 'id user',
+      constraint: ['user is not found'],
+    });
+  }
+
   async update(id, body: Partial<UpdateUserDto>) {
     const verifyUser = await this.findOne({ id: id });
 

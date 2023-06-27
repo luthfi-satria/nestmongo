@@ -9,6 +9,7 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import mongoose from 'mongoose';
 import { UserType } from '../hash/guard/interface/user.interface';
+import { JwtGuard } from '../hash/guard/jwt/jwt.guard';
 
 describe('UsersController', () => {
   let userController: UsersController;
@@ -16,18 +17,22 @@ describe('UsersController', () => {
     findOne: jest.fn(),
     findAll: jest.fn(),
     register: jest.fn(),
+    profile: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [],
       controllers: [UsersController],
       providers: [
         {
           provide: UsersService,
           useValue: mockUsersService,
+        },
+        {
+          provide: JwtGuard,
+          useValue: jest.fn().mockImplementation(() => true),
         },
         ResponseService,
         MessageService,
@@ -99,12 +104,21 @@ describe('UsersController', () => {
       phone: '12345678',
       username: 'test_username',
     } as Partial<UsersDocument>;
-    jest.spyOn(mockUsersService, 'findOne').mockReturnValue(userData);
-    const result = await userController.detail(user);
 
-    expect(result).toEqual(userData);
-    expect(mockUsersService.findOne).toBeCalled();
-    expect(mockUsersService.findOne).toBeCalledWith({ id: user.id });
+    const response = {
+      success: true,
+      message: 'user profile',
+      data: userData,
+    };
+
+    jest.spyOn(mockUsersService, 'profile').mockReturnValue(response);
+    const result = await userController.profile(user);
+
+    expect(result).toEqual(response);
+    expect(mockUsersService.profile).toBeCalled();
+    expect(mockUsersService.profile).toBeCalledWith(
+      new mongoose.Types.ObjectId(user.id),
+    );
   });
 
   // UNIT TEST - UPDATE USER DETAIL

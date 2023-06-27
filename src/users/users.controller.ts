@@ -25,7 +25,7 @@ export class UsersController {
   @UserType('admin')
   @AuthJwtGuard()
   async detail(@Param() user: GetUserDetail) {
-    return this.userService.findOne({ _id: user.id });
+    return await this.userService.profile(user.id);
   }
 
   @Get('')
@@ -34,14 +34,24 @@ export class UsersController {
   @AuthJwtGuard()
   async profile(@User() user: any) {
     const id = DBHelper.NewObjectID(user.id);
-    return this.userService.findOne({ _id: id });
+    return await this.userService.profile(id);
   }
 
-  @Put(':id')
+  @Put('')
   @UserType('admin', 'user')
   @AuthJwtGuard()
   @ResponseStatusCode()
+  async updateProfile(@User() user: any, @Body() body: UpdateUserDto) {
+    const userid = DBHelper.NewObjectID(user.id);
+    return this.userService.update(userid, body);
+  }
+
+  @Put(':id')
+  @UserType('admin')
+  @AuthJwtGuard()
+  @ResponseStatusCode()
   async update(@Param('id') id, @Body() body: UpdateUserDto) {
-    return this.userService.update(id, body);
+    const userid = DBHelper.NewObjectID(id);
+    return this.userService.update(userid, body);
   }
 }
