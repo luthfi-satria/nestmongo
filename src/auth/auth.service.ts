@@ -40,6 +40,7 @@ export class AuthService {
         username: user.username,
         email: user.email,
         user_type: user.user_type,
+        level: user.level,
       };
 
       return this.hashService.jwtSign(

@@ -123,7 +123,10 @@ describe('UsersController', () => {
 
   // UNIT TEST - UPDATE USER DETAIL
   it('update => user profile should be updated', async () => {
-    const id = new mongoose.Types.ObjectId('64999711d4831a2711cfbbb8');
+    const id = {
+      id: '64999711d4831a2711cfbbb8',
+    } as GetUserDetail;
+
     const updateUserDto = {
       name: 'new test',
       phone: '234567889',

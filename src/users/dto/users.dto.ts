@@ -6,7 +6,7 @@ import {
   Length,
   ValidateIf,
 } from 'class-validator';
-import { UserType } from '../../hash/guard/interface/user.interface';
+import { Level, UserType } from '../../hash/guard/interface/user.interface';
 import { Transform, Type } from 'class-transformer';
 import { Types } from 'mongoose';
 import { DBHelper } from '../../helper/database.helper';
@@ -43,6 +43,10 @@ export class CreateUsersDto {
   @IsString()
   @IsNotEmpty()
   user_type: UserType;
+
+  @IsString()
+  @IsNotEmpty()
+  level: Level;
 }
 
 export class UpdateUserDto {
@@ -64,4 +68,8 @@ export class UpdateUserDto {
   @IsString()
   @IsNotEmpty()
   user_type: UserType;
+
+  @IsString()
+  @IsNotEmpty()
+  level: Level;
 }

@@ -104,7 +104,7 @@ export class UsersService {
   }
 
   async update(id, body: Partial<UpdateUserDto>) {
-    const verifyUser = await this.findOne({ id: id });
+    const verifyUser = await this.findOne({ _id: id });
 
     if (verifyUser) {
       const updated = Object.assign(verifyUser, body);

@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
-import { UserType } from '../../hash/guard/interface/user.interface';
+import { Level, UserType } from '../../hash/guard/interface/user.interface';
 
 @Entity({ name: 'users' })
 export class UsersDocument {
@@ -30,10 +30,19 @@ export class UsersDocument {
   user_type?: UserType;
 
   @Column()
+  level?: Level;
+
+  @Column()
   password?: string;
 
   @Column()
   token_reset_password: string;
+
+  @Column({
+    type: 'timestamp',
+    nullable: true,
+  })
+  verify_at?: Date;
 
   @CreateDateColumn({
     type: 'timestamp',

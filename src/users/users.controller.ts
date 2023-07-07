@@ -50,8 +50,7 @@ export class UsersController {
   @UserType('admin')
   @AuthJwtGuard()
   @ResponseStatusCode()
-  async update(@Param('id') id, @Body() body: UpdateUserDto) {
-    const userid = DBHelper.NewObjectID(id);
-    return this.userService.update(userid, body);
+  async update(@Param() param: GetUserDetail, @Body() body: UpdateUserDto) {
+    return this.userService.update(param.id, body);
   }
 }

@@ -1,11 +1,15 @@
 export enum UserType {
   User = 'user',
   Admin = 'admin',
+  Staff = 'staff',
+  Manager = 'manager',
+  Director = 'director',
 }
 
 export enum Level {
-  free = 'free',
-  member = 'member',
+  Owner = 'owner',
+  Company = 'company',
+  Public = 'public',
 }
 
 export interface User {
