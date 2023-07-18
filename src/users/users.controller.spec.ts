@@ -142,11 +142,12 @@ describe('UsersController', () => {
       username: 'test_username',
       user_type: UserType.User,
     } as Partial<UsersDocument>;
+
     jest.spyOn(mockUsersService, 'update').mockReturnValue(userData);
     const result = await userController.update(id, updateUserDto);
 
-    expect(result).toEqual(userData);
     expect(mockUsersService.update).toBeCalled();
-    expect(mockUsersService.update).toBeCalledWith(id, updateUserDto);
+    expect(mockUsersService.update).toBeCalledWith(id.id, updateUserDto);
+    expect(result).toEqual(userData);
   });
 });

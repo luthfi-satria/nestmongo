@@ -6,8 +6,6 @@ import { UserType } from '../hash/guard/user-type.decorator';
 import { AuthJwtGuard } from '../auth/auth.decorator';
 import { User } from '../auth/auth.decorator';
 import { DBHelper } from '../helper/database.helper';
-// import { AuthJwtGuard } from 'src/auth/auth.decorator';
-// import { UserType } from 'src/hash/guard/user-type.decorator';
 
 @Controller('api/user')
 @ResponseStatusCode()
@@ -43,7 +41,7 @@ export class UsersController {
   @ResponseStatusCode()
   async updateProfile(@User() user: any, @Body() body: UpdateUserDto) {
     const userid = DBHelper.NewObjectID(user.id);
-    return this.userService.update(userid, body);
+    return await this.userService.update(userid, body);
   }
 
   @Put(':id')
@@ -51,6 +49,6 @@ export class UsersController {
   @AuthJwtGuard()
   @ResponseStatusCode()
   async update(@Param() param: GetUserDetail, @Body() body: UpdateUserDto) {
-    return this.userService.update(param.id, body);
+    return await this.userService.update(param.id, body);
   }
 }
