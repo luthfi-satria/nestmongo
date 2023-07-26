@@ -6,7 +6,7 @@ import {
   Length,
   ValidateIf,
 } from 'class-validator';
-import { Level, UserType } from '../../hash/guard/interface/user.interface';
+import { UserType } from '../../hash/guard/interface/user.interface';
 import { Transform, Type } from 'class-transformer';
 import { Types } from 'mongoose';
 import { DBHelper } from '../../helper/database.helper';
@@ -46,7 +46,7 @@ export class CreateUsersDto {
 
   @IsString()
   @IsNotEmpty()
-  level: Level;
+  usergroup: string;
 }
 
 export class UpdateUserDto {
@@ -56,9 +56,7 @@ export class UpdateUserDto {
 
   @IsNotEmpty()
   @IsString()
-  @ValidateIf((o) => o.email !== '')
-  @IsEmail()
-  email: string;
+  username: string;
 
   @IsNotEmpty({ message: 'Phone is required' })
   @IsNumberString()
@@ -71,5 +69,5 @@ export class UpdateUserDto {
 
   @IsString()
   @IsNotEmpty()
-  level: Level;
+  usergroup: string;
 }

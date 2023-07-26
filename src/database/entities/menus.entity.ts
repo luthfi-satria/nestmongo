@@ -7,16 +7,22 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity({ name: 'usergroup' })
-export class UsergroupDocument {
+@Entity({ name: 'menus' })
+export class MenusDocuments {
   @ObjectIdColumn()
-  _id: Types.ObjectId;
+  id: Types.ObjectId;
 
   @Column()
   name?: string;
 
-  @Column({ default: false, nullable: false })
-  is_default?: boolean;
+  @Column()
+  label?: string;
+
+  @Column()
+  api_url?: string;
+
+  @Column()
+  sequence?: number;
 
   @CreateDateColumn({
     type: 'timestamp',
@@ -37,7 +43,7 @@ export class UsergroupDocument {
   })
   deleted_at?: Date;
 
-  constructor(init?: Partial<UsergroupDocument>) {
+  constructor(init?: Partial<MenusDocuments>) {
     Object.assign(this, init);
   }
 }

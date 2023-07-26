@@ -7,6 +7,7 @@ import { DatabaseService } from './database/database.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { UsergroupModule } from './usergroup/usergroup.module';
+import { UsergroupAccessModule } from './usergroup_access/usergroup_access.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UsergroupModule } from './usergroup/usergroup.module';
     UsersModule,
     AuthModule,
     UsergroupModule,
+    UsergroupAccessModule,
   ],
   controllers: [AppController],
   providers: [AppService],

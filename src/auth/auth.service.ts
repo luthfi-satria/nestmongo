@@ -19,6 +19,7 @@ export class AuthService {
     if (user) {
       validate = await this.validatePassword(password, user.password);
     }
+
     if (!validate) {
       const errors: RMessage = {
         value: password,
@@ -36,13 +37,12 @@ export class AuthService {
 
     if (user && validate) {
       const payload = {
-        id: user.id,
+        id: user._id,
         username: user.username,
         email: user.email,
         user_type: user.user_type,
-        level: user.level,
+        usergroup: user.usergroup?.name,
       };
-
       return this.hashService.jwtSign(
         payload,
         `${process.env.AUTH_JWTEXPIRATIONTIME}`,

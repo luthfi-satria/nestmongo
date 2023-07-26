@@ -7,12 +7,13 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
-import { Level, UserType } from '../../hash/guard/interface/user.interface';
+import { UserType } from '../../hash/guard/interface/user.interface';
+import { UsergroupDocument } from './usergroup.entity';
 
 @Entity({ name: 'users' })
 export class UsersDocument {
   @ObjectIdColumn()
-  id: Types.ObjectId;
+  _id: Types.ObjectId;
 
   @Column()
   name?: string;
@@ -29,8 +30,8 @@ export class UsersDocument {
   @Column()
   user_type?: UserType;
 
-  @Column()
-  level?: Level;
+  @Column(() => UsergroupDocument)
+  usergroup?: UsergroupDocument;
 
   @Column()
   password?: string;

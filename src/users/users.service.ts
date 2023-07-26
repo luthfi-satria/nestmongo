@@ -6,6 +6,7 @@ import { randomUUID } from 'crypto';
 import { genSaltSync, hash } from 'bcrypt';
 import { UsersDocument } from '../database/entities/users.entity';
 import { ResponseService } from '../response/response.service';
+import { UsergroupDocument } from '../database/entities/usergroup.entity';
 
 @Injectable()
 export class UsersService {
@@ -13,6 +14,8 @@ export class UsersService {
     @InjectRepository(UsersDocument)
     private readonly usersRepo: MongoRepository<UsersDocument>,
     private readonly responseService: ResponseService,
+    @InjectRepository(UsergroupDocument)
+    private readonly groupRepo: MongoRepository<UsergroupDocument>,
   ) {}
 
   private readonly logger = new Logger(UsersService.name);
@@ -57,8 +60,25 @@ export class UsersService {
 
       const token = randomUUID();
       const password = await this.generateHashPassword(data.password);
+
+      // Get usergroup
+      const usergroup = await this.groupRepo.findOneBy({
+        name: data.usergroup,
+      });
+      if (!usergroup) {
+        return this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          {
+            value: data.usergroup,
+            property: 'usergroup',
+            constraint: ['Usergroup is not found!'],
+          },
+          'Usergroup is not found',
+        );
+      }
       const newUser: Partial<UsersDocument> = {
         ...data,
+        usergroup: usergroup,
         password: password,
         token_reset_password: token,
       };
@@ -105,10 +125,29 @@ export class UsersService {
 
   async update(id, body: Partial<UpdateUserDto>) {
     const verifyUser = await this.findOne({ _id: id });
-
     if (verifyUser) {
+      // Get usergroup
+      const usergroup = await this.groupRepo.findOneBy({
+        name: body.usergroup,
+      });
+
+      if (!usergroup) {
+        return this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          {
+            value: id,
+            property: 'usergroup',
+            constraint: ['Usergroup is not found!'],
+          },
+          'Usergroup is not found',
+        );
+      }
+
+      verifyUser.usergroup = usergroup;
+      delete body.usergroup;
       const updated = Object.assign(verifyUser, body);
-      const saveUpdate = await this.usersRepo.save(updated);
+
+      const saveUpdate = await this.usersRepo.update({ _id: id }, updated);
       if (saveUpdate) {
         return this.responseService.success(
           true,

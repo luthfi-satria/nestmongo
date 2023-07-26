@@ -1,3 +1,5 @@
+import { UsergroupDocument } from '../../../database/entities/usergroup.entity';
+
 export enum UserType {
   User = 'user',
   Admin = 'admin',
@@ -6,14 +8,8 @@ export enum UserType {
   Director = 'director',
 }
 
-export enum Level {
-  Owner = 'owner',
-  Company = 'company',
-  Public = 'public',
-}
-
 export interface User {
   id: string;
   user_type: UserType;
-  level: Level;
+  usergroup: UsergroupDocument;
 }
