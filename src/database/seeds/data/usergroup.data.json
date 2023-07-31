@@ -1,0 +1,17 @@
+[
+    {
+        "_id": "64c33f917e0eefb91b0cd9b2",
+        "name": "owner",
+        "is_default": false
+    },
+    {
+        "_id": "64c33f967e0eefb91b0cd9b5",
+        "name": "company",
+        "is_default": false
+    },
+    {
+        "_id": "64c33f7c7e0eefb91b0cd9af",
+        "name": "public",
+        "is_default": true
+    }
+]

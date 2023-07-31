@@ -1,46 +1,51 @@
-import { Types } from 'mongoose';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ObjectIdColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import mongoose from 'mongoose';
 
-@Entity({ name: 'usergroup_access' })
-export class AccessDocument {
-  @ObjectIdColumn()
-  id: Types.ObjectId;
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, ObjectId } from 'mongoose';
+import { Transform, Type } from 'class-transformer';
+import { Usergroups } from './usergroup.entity';
+import { Appmenus } from './menus.entity';
 
-  @Column()
-  group_id?: Types.ObjectId;
+export type UseraccessDocument = Useraccess & Document;
 
-  @Column()
-  menus_id?: Types.ObjectId;
+@Schema()
+export class Useraccess {
+  @Transform(({ value }) => value.toString())
+  _id: ObjectId;
 
-  @Column()
-  permissions?: string[];
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Usergroups' })
+  @Type(() => Usergroups)
+  usergroup?: Usergroups;
 
-  @CreateDateColumn({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Appmenus' })
+  @Type(() => Appmenus)
+  menus?: Appmenus;
+
+  @Prop()
+  permission?: string[];
+
+  @Prop({
+    type: 'date',
+    default: Date.now,
     nullable: true,
   })
   created_at?: Date;
 
-  @UpdateDateColumn({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
+  @Prop({
+    type: 'date',
+    default: Date.now,
     nullable: true,
   })
   updated_at?: Date;
 
-  @Column({
+  @Prop({
     nullable: true,
   })
   deleted_at?: Date;
-
-  constructor(init?: Partial<AccessDocument>) {
-    Object.assign(this, init);
-  }
 }
+
+const UseraccessSchema = SchemaFactory.createForClass(Useraccess);
+
+// UseraccessSchema.index({ name: 'text', is_default: 'text' });
+
+export { UseraccessSchema };

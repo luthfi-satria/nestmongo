@@ -1,49 +1,48 @@
-import { Types } from 'mongoose';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ObjectIdColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, ObjectId } from 'mongoose';
+import { Transform } from 'class-transformer';
 
-@Entity({ name: 'menus' })
-export class MenusDocuments {
-  @ObjectIdColumn()
-  id: Types.ObjectId;
+export type AppmenusDocument = Appmenus & Document;
 
-  @Column()
+@Schema()
+export class Appmenus {
+  @Transform(({ value }) => value.toString())
+  _id: ObjectId;
+
+  @Prop()
   name?: string;
 
-  @Column()
+  @Prop()
   label?: string;
 
-  @Column()
+  @Prop()
   api_url?: string;
 
-  @Column()
+  @Prop()
   sequence?: number;
 
-  @CreateDateColumn({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
+  @Prop({
+    type: 'date',
+    default: Date.now,
     nullable: true,
   })
   created_at?: Date;
 
-  @UpdateDateColumn({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
+  @Prop({
+    type: 'date',
+    default: Date.now,
     nullable: true,
   })
   updated_at?: Date;
 
-  @Column({
+  @Prop({
     nullable: true,
   })
   deleted_at?: Date;
-
-  constructor(init?: Partial<MenusDocuments>) {
-    Object.assign(this, init);
-  }
 }
+
+const AppmenuSchema = SchemaFactory.createForClass(Appmenus);
+
+AppmenuSchema.index({ name: 'text', api_url: 'text' });
+
+export { AppmenuSchema };

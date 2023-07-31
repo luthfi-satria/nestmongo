@@ -1,70 +1,75 @@
-import { Types } from 'mongoose';
-import {
-  Entity,
-  ObjectIdColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
-} from 'typeorm';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, ObjectId } from 'mongoose';
+import * as mongoose from 'mongoose';
+import { Transform, Type } from 'class-transformer';
 import { UserType } from '../../hash/guard/interface/user.interface';
-import { UsergroupDocument } from './usergroup.entity';
+import { Usergroups } from './usergroup.entity';
 
-@Entity({ name: 'users' })
-export class UsersDocument {
-  @ObjectIdColumn()
-  _id: Types.ObjectId;
+export type UsersDocument = Users & Document;
 
-  @Column()
+@Schema()
+export class Users {
+  @Transform(({ value }) => value.toString())
+  _id: ObjectId;
+
+  @Prop()
   name?: string;
 
-  @Column()
+  @Prop()
   username?: string;
 
-  @Column()
+  @Prop()
   email?: string;
 
-  @Column()
+  @Prop()
   phone?: string;
 
-  @Column()
+  @Prop()
   user_type?: UserType;
 
-  @Column(() => UsergroupDocument)
-  usergroup?: UsergroupDocument;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Usergroups' })
+  @Type(() => Usergroups)
+  usergroup?: Usergroups;
 
-  @Column()
+  @Prop()
   password?: string;
 
-  @Column()
+  @Prop()
   token_reset_password: string;
 
-  @Column({
-    type: 'timestamp',
+  @Prop({
+    type: 'date',
     nullable: true,
   })
   verify_at?: Date;
 
-  @CreateDateColumn({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
+  @Prop({
+    type: 'date',
+    default: Date.now,
     nullable: true,
   })
   created_at?: Date;
 
-  @UpdateDateColumn({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
+  @Prop({
+    type: 'date',
+    default: Date.now,
     nullable: true,
   })
   updated_at?: Date;
 
-  @DeleteDateColumn({
+  @Prop({
     nullable: true,
   })
   deleted_at?: Date;
-
-  constructor(init?: Partial<UsersDocument>) {
-    Object.assign(this, init);
-  }
 }
+
+const UserSchema = SchemaFactory.createForClass(Users);
+
+UserSchema.index({
+  name: 'text',
+  email: 'text',
+  username: 'text',
+  phone: 'text',
+});
+
+export { UserSchema };

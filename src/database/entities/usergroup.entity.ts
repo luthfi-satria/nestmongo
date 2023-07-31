@@ -1,43 +1,42 @@
-import { Types } from 'mongoose';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ObjectIdColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, ObjectId } from 'mongoose';
+import { Transform } from 'class-transformer';
 
-@Entity({ name: 'usergroup' })
-export class UsergroupDocument {
-  @ObjectIdColumn()
-  _id: Types.ObjectId;
+export type UsergroupsDocument = Usergroups & Document;
 
-  @Column()
+@Schema()
+export class Usergroups {
+  @Transform(({ value }) => value.toString())
+  _id: ObjectId;
+
+  @Prop()
   name?: string;
 
-  @Column({ default: false, nullable: false })
+  @Prop()
   is_default?: boolean;
 
-  @CreateDateColumn({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
+  @Prop({
+    type: 'date',
+    default: Date.now,
     nullable: true,
   })
   created_at?: Date;
 
-  @UpdateDateColumn({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
+  @Prop({
+    type: 'date',
+    default: Date.now,
     nullable: true,
   })
   updated_at?: Date;
 
-  @Column({
+  @Prop({
     nullable: true,
   })
   deleted_at?: Date;
-
-  constructor(init?: Partial<UsergroupDocument>) {
-    Object.assign(this, init);
-  }
 }
+
+const UsergroupsSchema = SchemaFactory.createForClass(Usergroups);
+
+UsergroupsSchema.index({ name: 'text', is_default: 'text' });
+
+export { UsergroupsSchema };

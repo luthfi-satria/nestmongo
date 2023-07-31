@@ -1,15 +1,23 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { UsersController } from './users.controller';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users.service';
-import { UsersDocument } from '../database/entities/users.entity';
+import { UserSchema, Users } from '../database/entities/users.entity';
 import { ResponseService } from '../response/response.service';
 import { MessageService } from '../message/message.service';
-import { UsergroupDocument } from '../database/entities/usergroup.entity';
+import {
+  Usergroups,
+  UsergroupsSchema,
+} from '../database/entities/usergroup.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UsersDocument, UsergroupDocument])],
+  imports: [
+    MongooseModule.forFeature([
+      { name: Users.name, schema: UserSchema },
+      { name: Usergroups.name, schema: UsergroupsSchema },
+    ]),
+  ],
   exports: [UsersService],
   providers: [UsersService, ResponseService, MessageService, JwtService],
   controllers: [UsersController],

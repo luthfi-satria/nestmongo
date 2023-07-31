@@ -14,7 +14,7 @@ export class UsergroupAccessController {
   @UserType('admin')
   @AuthJwtGuard()
   async getAccess(@User() user) {
-    return await this.accessService.getAccess(user);
+    return await this.accessService.getAccess();
   }
 
   @Post()

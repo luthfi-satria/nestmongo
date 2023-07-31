@@ -1,6 +1,11 @@
 import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUsersDto, GetUserDetail, UpdateUserDto } from './dto/users.dto';
+import {
+  CreateUsersDto,
+  GetUserDetail,
+  ListUser,
+  UpdateUserDto,
+} from './dto/users.dto';
 import { ResponseStatusCode } from '../response/response.decorator';
 import { UserType } from '../hash/guard/user-type.decorator';
 import { AuthJwtGuard } from '../auth/auth.decorator';
@@ -18,7 +23,15 @@ export class UsersController {
     return this.userService.register(payload);
   }
 
-  @Get(':id')
+  @Get()
+  @ResponseStatusCode()
+  @UserType('admin')
+  @AuthJwtGuard()
+  async listUser(@Param() param: ListUser) {
+    return await this.userService.listUser(param);
+  }
+
+  @Get('profile/:id')
   @ResponseStatusCode()
   @UserType('admin')
   @AuthJwtGuard()
@@ -26,7 +39,7 @@ export class UsersController {
     return await this.userService.profile(user.id);
   }
 
-  @Get('')
+  @Get('profile')
   @ResponseStatusCode()
   @UserType('admin', 'user')
   @AuthJwtGuard()
@@ -35,7 +48,7 @@ export class UsersController {
     return await this.userService.profile(id);
   }
 
-  @Put('')
+  @Put('profile')
   @UserType('admin', 'user')
   @AuthJwtGuard()
   @ResponseStatusCode()
@@ -44,7 +57,7 @@ export class UsersController {
     return await this.userService.update(userid, body);
   }
 
-  @Put(':id')
+  @Put('profile/:id')
   @UserType('admin')
   @AuthJwtGuard()
   @ResponseStatusCode()

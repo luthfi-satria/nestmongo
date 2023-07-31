@@ -1,9 +1,12 @@
 import {
   IsEmail,
   IsNotEmpty,
+  IsNumber,
   IsNumberString,
+  IsOptional,
   IsString,
   Length,
+  Min,
   ValidateIf,
 } from 'class-validator';
 import { UserType } from '../../hash/guard/interface/user.interface';
@@ -70,4 +73,42 @@ export class UpdateUserDto {
   @IsString()
   @IsNotEmpty()
   usergroup: string;
+}
+
+export class ListUser {
+  @IsOptional()
+  @IsString()
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  email: string;
+
+  @IsOptional()
+  @IsString()
+  username: string;
+
+  @IsOptional()
+  @IsString()
+  phone: string;
+
+  @IsOptional()
+  @IsString()
+  type: string;
+
+  @IsOptional()
+  @IsString()
+  usergroup: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  @Min(0)
+  skip: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  @Min(1)
+  limit: number;
 }

@@ -57,4 +57,11 @@ export class UsergroupController {
   async delete(@Param() param: GetUsergroupID) {
     return await this.usergroupService.delete(param.id);
   }
+
+  @Get('seed/read')
+  @ResponseStatusCode()
+  async readFile() {
+    const result = await this.usergroupService.seeding();
+    return result;
+  }
 }

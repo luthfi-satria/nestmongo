@@ -1,19 +1,22 @@
 import { Injectable, Logger, HttpStatus } from '@nestjs/common';
 import { UsergroupDto } from './dto/usergroup.dto';
-import { Repository } from 'typeorm';
-import { UsergroupDocument } from '../database/entities/usergroup.entity';
-import { InjectRepository } from '@nestjs/typeorm';
+import {
+  Usergroups,
+  UsergroupsDocument,
+} from '../database/entities/usergroup.entity';
+import { InjectModel } from '@nestjs/mongoose';
 import { ResponseService } from '../response/response.service';
-import { MessageService } from '../message/message.service';
 import { DatetimeHelper } from '../helper/datetime.helper';
+import { Model, Types } from 'mongoose';
+import * as fs from 'fs';
+import { join } from 'path';
 
 @Injectable()
 export class UsergroupService {
   constructor(
-    @InjectRepository(UsergroupDocument)
-    private readonly usergroupRepo: Repository<UsergroupDocument>,
+    @InjectModel(Usergroups.name)
+    private readonly usergroupRepo: Model<UsergroupsDocument>,
     private readonly responseService: ResponseService,
-    private readonly messageService: MessageService,
   ) {}
 
   async getAll() {
@@ -21,12 +24,12 @@ export class UsergroupService {
   }
 
   async findOne(search: any) {
-    return await this.usergroupRepo.findOneBy(search);
+    return await this.usergroupRepo.findOne(search);
   }
 
   async create(body: UsergroupDto) {
     try {
-      const isExists = await this.usergroupRepo.findOneBy({
+      const isExists = await this.usergroupRepo.findOne({
         name: body.name,
       });
 
@@ -42,8 +45,8 @@ export class UsergroupService {
         );
       }
 
-      const saveUsergroup = await this.usergroupRepo
-        .save(body)
+      const saveUsergroup = new this.usergroupRepo(body)
+        .save()
         .catch((e) => {
           Logger.log(e.message, 'Create usergroup');
           throw e;
@@ -79,20 +82,26 @@ export class UsergroupService {
       }
 
       const updated = Object.assign(isExists, body);
-      const updateUsergroup = await this.usergroupRepo
-        .save(updated)
-        .catch((e) => {
-          Logger.log(e.message, 'update usergroup');
-          throw e;
-        })
-        .then((e) => {
-          return e;
-        });
+      const updateUsergroup = await this.usergroupRepo.findOneAndReplace(
+        { _id: id },
+        updated,
+        { new: true },
+      );
 
-      return this.responseService.success(
-        true,
-        'Success update usergroup!',
-        updateUsergroup,
+      if (updateUsergroup) {
+        return this.responseService.success(
+          true,
+          'user group has been updated!',
+        );
+      }
+      return this.responseService.error(
+        HttpStatus.BAD_REQUEST,
+        {
+          value: id,
+          property: 'user group',
+          constraint: ['user group failed to update!'],
+        },
+        'user group failed to updated!',
       );
     } catch (err) {}
   }
@@ -115,24 +124,67 @@ export class UsergroupService {
         deleted_at: DatetimeHelper.CurrentDateTime('ISO'),
       });
 
-      const deleteUsergroup = await this.usergroupRepo
-        .save(softDel)
-        .catch((e) => {
-          Logger.log(e.message, 'delete usergroup');
-          throw e;
-        })
-        .then((e) => {
-          return e;
-        });
+      const deleteUsergroup = await this.usergroupRepo.findOneAndReplace(
+        { _id: id },
+        softDel,
+        { new: true },
+      );
 
-      return this.responseService.success(
-        true,
-        'Success deleting usergroup!',
-        deleteUsergroup,
+      if (deleteUsergroup) {
+        return this.responseService.success(
+          true,
+          'user group has been updated!',
+        );
+      }
+      return this.responseService.error(
+        HttpStatus.BAD_REQUEST,
+        {
+          value: id,
+          property: 'user group',
+          constraint: ['user group failed to update!'],
+        },
+        'user group failed to updated!',
       );
     } catch (err) {
       Logger.log(err.message, 'Delete usergroup');
       throw err;
+    }
+  }
+
+  async seeding() {
+    try {
+      const usergroupData = fs.readFileSync(
+        join(process.cwd(), 'src/database/seeds/data/usergroup.data.json'),
+        'utf-8',
+      );
+
+      const parseData = JSON.parse(usergroupData);
+      let replacement;
+      if (parseData) {
+        for (const items in parseData) {
+          const query = { _id: parseData[items]['_id'] };
+          parseData[items]['_id'] = new Types.ObjectId(parseData[items]['_id']);
+          replacement = await this.usergroupRepo.replaceOne(
+            query,
+            parseData[items],
+          );
+        }
+      }
+
+      if (!replacement) {
+        return {
+          code: HttpStatus.BAD_REQUEST,
+          message: 'usergroup seeding process is error',
+        };
+      }
+
+      return {
+        code: HttpStatus.OK,
+        message: 'usergroup seeding has been completed',
+      };
+    } catch (error) {
+      Logger.log(error.message, 'Seeding data is aborting, file is not exists');
+      throw error;
     }
   }
 }

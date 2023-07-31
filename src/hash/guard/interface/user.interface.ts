@@ -1,4 +1,4 @@
-import { UsergroupDocument } from '../../../database/entities/usergroup.entity';
+import { UsergroupsDocument } from '../../../database/entities/usergroup.entity';
 
 export enum UserType {
   User = 'user',
@@ -11,5 +11,5 @@ export enum UserType {
 export interface User {
   id: string;
   user_type: UserType;
-  usergroup: UsergroupDocument;
+  usergroup: UsergroupsDocument;
 }

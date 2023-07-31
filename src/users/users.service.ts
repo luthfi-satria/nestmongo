@@ -1,32 +1,35 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { MongoRepository } from 'typeorm';
-import { CreateUsersDto, UpdateUserDto } from './dto/users.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { CreateUsersDto, ListUser, UpdateUserDto } from './dto/users.dto';
 import { randomUUID } from 'crypto';
 import { genSaltSync, hash } from 'bcrypt';
-import { UsersDocument } from '../database/entities/users.entity';
+import { Users, UsersDocument } from '../database/entities/users.entity';
 import { ResponseService } from '../response/response.service';
-import { UsergroupDocument } from '../database/entities/usergroup.entity';
+import {
+  Usergroups,
+  UsergroupsDocument,
+} from '../database/entities/usergroup.entity';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(UsersDocument)
-    private readonly usersRepo: MongoRepository<UsersDocument>,
+    @InjectModel(Users.name)
+    private readonly usersRepo: Model<UsersDocument>,
     private readonly responseService: ResponseService,
-    @InjectRepository(UsergroupDocument)
-    private readonly groupRepo: MongoRepository<UsergroupDocument>,
+    @InjectModel(Usergroups.name)
+    private readonly groupRepo: Model<UsergroupsDocument>,
   ) {}
 
   private readonly logger = new Logger(UsersService.name);
 
   async findOne(search: any) {
-    return await this.usersRepo.findOneBy(search);
+    return await this.usersRepo.findOne(search).populate('usergroup');
   }
 
   async register(data: CreateUsersDto) {
     try {
-      const isExists = await this.usersRepo.findOneBy({
+      const isExists = await this.usersRepo.findOne({
         email: data.email,
       });
 
@@ -42,7 +45,7 @@ export class UsersService {
         );
       }
 
-      const isPhoneExists = await this.usersRepo.findOneBy({
+      const isPhoneExists = await this.usersRepo.findOne({
         phone: data.phone,
       });
 
@@ -62,9 +65,10 @@ export class UsersService {
       const password = await this.generateHashPassword(data.password);
 
       // Get usergroup
-      const usergroup = await this.groupRepo.findOneBy({
+      const usergroup = await this.groupRepo.findOne({
         name: data.usergroup,
       });
+
       if (!usergroup) {
         return this.responseService.error(
           HttpStatus.BAD_REQUEST,
@@ -76,15 +80,15 @@ export class UsersService {
           'Usergroup is not found',
         );
       }
-      const newUser: Partial<UsersDocument> = {
+      const newUser = {
         ...data,
-        usergroup: usergroup,
+        usergroup: usergroup._id,
         password: password,
         token_reset_password: token,
       };
 
-      const result: Record<string, any> = await this.usersRepo
-        .save(newUser)
+      const result: Record<string, any> = new this.usersRepo(newUser)
+        .save()
         .catch((e) => {
           Logger.error(e.message, '', 'Create User');
           throw e;
@@ -127,10 +131,9 @@ export class UsersService {
     const verifyUser = await this.findOne({ _id: id });
     if (verifyUser) {
       // Get usergroup
-      const usergroup = await this.groupRepo.findOneBy({
+      const usergroup = await this.groupRepo.findOne({
         name: body.usergroup,
       });
-
       if (!usergroup) {
         return this.responseService.error(
           HttpStatus.BAD_REQUEST,
@@ -143,11 +146,15 @@ export class UsersService {
         );
       }
 
-      verifyUser.usergroup = usergroup;
+      verifyUser.usergroup = usergroup._id;
       delete body.usergroup;
       const updated = Object.assign(verifyUser, body);
 
-      const saveUpdate = await this.usersRepo.update({ _id: id }, updated);
+      const saveUpdate = await this.usersRepo.findOneAndReplace(
+        { _id: id },
+        updated,
+        { new: true },
+      );
       if (saveUpdate) {
         return this.responseService.success(
           true,
@@ -174,5 +181,9 @@ export class UsersService {
       },
       'user account is not found',
     );
+  }
+
+  async listUser(param: ListUser) {
+    return param;
   }
 }
