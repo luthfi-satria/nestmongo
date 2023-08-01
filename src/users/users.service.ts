@@ -191,9 +191,8 @@ export class UsersService {
     try {
       const limit = param.limit || 10;
       const page = param.page || 1;
-      const skip = (page - 1) * 10;
+      const skip = (page - 1) * limit;
       const startId = param.startId || '';
-
       const filters: FilterQuery<UsersDocument> = startId
         ? {
             _id: {
@@ -207,7 +206,6 @@ export class UsersService {
           $search: param.searchQuery,
         };
       }
-
       const findQuery = await this.usersRepo
         .find(filters, {
           _id: 1,
@@ -222,7 +220,7 @@ export class UsersService {
         })
         .sort({ _id: 1 })
         .skip(skip)
-        .populate('usergroup')
+        .populate('usergroup', { _id: 1, name: 1, is_default: 1 })
         .limit(limit);
 
       const count = await this.usersRepo.count();

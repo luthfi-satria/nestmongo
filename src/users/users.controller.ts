@@ -6,6 +6,7 @@ import {
   Post,
   Put,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
@@ -40,7 +41,7 @@ export class UsersController {
   @ResponseStatusCode()
   @UserType('admin')
   @AuthJwtGuard()
-  async listUser(@Param() param: ListUser) {
+  async listUser(@Query() param: ListUser) {
     return await this.userService.listUser(param);
   }
 
