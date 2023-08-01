@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  HttpStatus,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
   CreateUsersDto,
@@ -11,11 +19,16 @@ import { UserType } from '../hash/guard/user-type.decorator';
 import { AuthJwtGuard } from '../auth/auth.decorator';
 import { User } from '../auth/auth.decorator';
 import { DBHelper } from '../helper/database.helper';
+import { Types } from 'mongoose';
+import { ResponseService } from '../response/response.service';
 
 @Controller('api/user')
 @ResponseStatusCode()
 export class UsersController {
-  constructor(private readonly userService: UsersService) {}
+  constructor(
+    private readonly userService: UsersService,
+    private readonly responseService: ResponseService,
+  ) {}
 
   @Post('register')
   @ResponseStatusCode()
@@ -62,6 +75,13 @@ export class UsersController {
   @AuthJwtGuard()
   @ResponseStatusCode()
   async update(@Param() param: GetUserDetail, @Body() body: UpdateUserDto) {
+    if (Types.ObjectId.isValid(param.id) == false) {
+      return this.responseService.error(HttpStatus.BAD_REQUEST, {
+        value: param.id,
+        property: 'id',
+        constraint: ['invalid id format'],
+      });
+    }
     return await this.userService.update(param.id, body);
   }
 }

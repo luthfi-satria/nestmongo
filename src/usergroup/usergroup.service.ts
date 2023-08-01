@@ -69,6 +69,7 @@ export class UsergroupService {
   async update(id, body: UsergroupDto) {
     try {
       const isExists = await this.findOne({ _id: id });
+
       if (!isExists) {
         return this.responseService.error(
           HttpStatus.BAD_REQUEST,
@@ -82,10 +83,9 @@ export class UsergroupService {
       }
 
       const updated = Object.assign(isExists, body);
-      const updateUsergroup = await this.usergroupRepo.findOneAndReplace(
+      const updateUsergroup = await this.usergroupRepo.updateOne(
         { _id: id },
         updated,
-        { new: true },
       );
 
       if (updateUsergroup) {
@@ -103,7 +103,10 @@ export class UsergroupService {
         },
         'user group failed to updated!',
       );
-    } catch (err) {}
+    } catch (err) {
+      Logger.log(err.message, 'Cannot update usergroup');
+      throw err;
+    }
   }
 
   async delete(id) {

@@ -128,59 +128,60 @@ export class UsersService {
   }
 
   async update(id, body: Partial<UpdateUserDto>) {
-    const verifyUser = await this.findOne({ _id: id });
-    if (verifyUser) {
-      // Get usergroup
-      const usergroup = await this.groupRepo.findOne({
-        name: body.usergroup,
-      });
-      if (!usergroup) {
+    try {
+      const verifyUser = await this.findOne({ _id: id });
+      if (verifyUser) {
+        // Get usergroup
+        const usergroup = await this.groupRepo.findOne({
+          name: body.usergroup,
+        });
+        if (!usergroup) {
+          return this.responseService.error(
+            HttpStatus.BAD_REQUEST,
+            {
+              value: id,
+              property: 'usergroup',
+              constraint: ['Usergroup is not found!'],
+            },
+            'Usergroup is not found',
+          );
+        }
+
+        verifyUser.usergroup = usergroup._id;
+        delete body.usergroup;
+        const updated = Object.assign(verifyUser, body);
+
+        const saveUpdate = await this.usersRepo.updateOne({ _id: id }, updated);
+        if (saveUpdate) {
+          return this.responseService.success(
+            true,
+            'user account has been updated!',
+          );
+        }
         return this.responseService.error(
           HttpStatus.BAD_REQUEST,
           {
             value: id,
-            property: 'usergroup',
-            constraint: ['Usergroup is not found!'],
+            property: 'user account',
+            constraint: ['user account failed to update!'],
           },
-          'Usergroup is not found',
+          'user account failed to updated!',
         );
       }
 
-      verifyUser.usergroup = usergroup._id;
-      delete body.usergroup;
-      const updated = Object.assign(verifyUser, body);
-
-      const saveUpdate = await this.usersRepo.findOneAndReplace(
-        { _id: id },
-        updated,
-        { new: true },
-      );
-      if (saveUpdate) {
-        return this.responseService.success(
-          true,
-          'user account has been updated!',
-        );
-      }
       return this.responseService.error(
         HttpStatus.BAD_REQUEST,
         {
           value: id,
           property: 'user account',
-          constraint: ['user account failed to update!'],
+          constraint: ['user account is not found!'],
         },
-        'user account failed to updated!',
+        'user account is not found',
       );
+    } catch (error) {
+      Logger.log(error.message, 'update profile unsuccessfully');
+      throw error;
     }
-
-    return this.responseService.error(
-      HttpStatus.BAD_REQUEST,
-      {
-        value: id,
-        property: 'user account',
-        constraint: ['user account is not found!'],
-      },
-      'user account is not found',
-    );
   }
 
   async listUser(param: ListUser) {
