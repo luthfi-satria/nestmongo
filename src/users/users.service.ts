@@ -9,7 +9,10 @@ import {
   Usergroups,
   UsergroupsDocument,
 } from '../database/entities/usergroup.entity';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
+import { faker } from '@faker-js/faker';
+import { UserType } from '../hash/guard/interface/user.interface';
+import { RSuccessMessage } from '../response/response.interface';
 
 @Injectable()
 export class UsersService {
@@ -185,6 +188,100 @@ export class UsersService {
   }
 
   async listUser(param: ListUser) {
-    return param;
+    try {
+      const limit = param.limit || 10;
+      const page = param.page || 1;
+      const skip = (page - 1) * 10;
+      const startId = param.startId || '';
+
+      const filters: FilterQuery<UsersDocument> = startId
+        ? {
+            _id: {
+              $gt: startId,
+            },
+          }
+        : {};
+
+      if (param.searchQuery) {
+        filters.$text = {
+          $search: param.searchQuery,
+        };
+      }
+
+      const findQuery = await this.usersRepo
+        .find(filters, {
+          _id: 1,
+          name: 1,
+          username: 1,
+          email: 1,
+          phone: 1,
+          user_type: 1,
+          usergroups: 1,
+          created_at: 1,
+          updated_at: 1,
+        })
+        .sort({ _id: 1 })
+        .skip(skip)
+        .populate('usergroup')
+        .limit(limit);
+
+      const count = await this.usersRepo.count();
+      const results: RSuccessMessage = {
+        success: true,
+        message: 'Get List users success',
+        data: {
+          total: count,
+          page: page,
+          skip: skip,
+          limit: limit,
+          items: findQuery,
+        },
+      };
+
+      return results;
+    } catch (err) {
+      Logger.error(err.message, 'Users failed to fetch');
+      throw err;
+    }
+  }
+
+  async seeding(total_user: number) {
+    try {
+      const userData: any = [];
+      const usergroup = await this.groupRepo.findOne({
+        is_default: true,
+      });
+
+      for (let item = 0; item < total_user; item++) {
+        const profile: Partial<Users> = {
+          name: faker.person.fullName(),
+          email: faker.internet.email(),
+          username: faker.internet.userName(),
+          phone: faker.phone.number(),
+          password: await this.generateHashPassword(faker.internet.password()),
+          user_type: UserType.User,
+          usergroup: usergroup?._id,
+        };
+        userData.push(profile);
+      }
+
+      if (userData.length > 0) {
+        const bulkIns = await this.usersRepo.insertMany(userData);
+        if (bulkIns) {
+          return {
+            code: HttpStatus.OK,
+            message: 'user dummy seeding has been completed',
+          };
+        }
+      }
+
+      return {
+        code: HttpStatus.PAYLOAD_TOO_LARGE,
+        message: 'User dummy failed to generate',
+      };
+    } catch (error) {
+      Logger.log(error.message, 'Seeding data is aborting, file is not exists');
+      throw error;
+    }
   }
 }

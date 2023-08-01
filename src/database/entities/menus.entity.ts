@@ -21,6 +21,15 @@ export class Appmenus {
   @Prop()
   sequence?: number;
 
+  @Prop()
+  parent_id?: string;
+
+  @Prop()
+  level?: number;
+
+  @Prop()
+  is_active?: boolean;
+
   @Prop({
     type: 'date',
     default: Date.now,
@@ -43,6 +52,11 @@ export class Appmenus {
 
 const AppmenuSchema = SchemaFactory.createForClass(Appmenus);
 
-AppmenuSchema.index({ name: 'text', api_url: 'text' });
+AppmenuSchema.index({
+  level: 'asc',
+  sequence: 'asc',
+  name: 'text',
+  label: 'text',
+});
 
 export { AppmenuSchema };

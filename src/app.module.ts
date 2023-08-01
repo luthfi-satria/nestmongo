@@ -10,6 +10,7 @@ import { UsergroupAccessModule } from './usergroup_access/usergroup_access.modul
 import { MongooseModule } from '@nestjs/mongoose';
 import { CommandModule } from 'nestjs-command';
 import { SeedingDB } from './database/seeds/seedings.seed';
+import { AppmenuModule } from './appmenu/appmenu.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -22,6 +23,7 @@ import { SeedingDB } from './database/seeds/seedings.seed';
     AuthModule,
     UsergroupModule,
     UsergroupAccessModule,
+    AppmenuModule,
   ],
   controllers: [AppController],
   providers: [AppService, SeedingDB],

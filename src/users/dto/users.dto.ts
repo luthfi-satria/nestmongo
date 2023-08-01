@@ -78,27 +78,34 @@ export class UpdateUserDto {
 export class ListUser {
   @IsOptional()
   @IsString()
-  name: string;
+  startId: string;
 
+  // @IsOptional()
+  // @IsString()
+  // name: string;
+
+  // @IsOptional()
+  // @IsString()
+  // email: string;
+
+  // @IsOptional()
+  // @IsString()
+  // username: string;
+
+  // @IsOptional()
+  // @IsString()
+  // phone: string;
+
+  // @IsOptional()
+  // @IsString()
+  // type: string;
+
+  // @IsOptional()
+  // @IsString()
+  // usergroup: string;
   @IsOptional()
   @IsString()
-  email: string;
-
-  @IsOptional()
-  @IsString()
-  username: string;
-
-  @IsOptional()
-  @IsString()
-  phone: string;
-
-  @IsOptional()
-  @IsString()
-  type: string;
-
-  @IsOptional()
-  @IsString()
-  usergroup: string;
+  searchQuery: string;
 
   @IsOptional()
   @IsNumber()
@@ -111,4 +118,10 @@ export class ListUser {
   @Type(() => Number)
   @Min(1)
   limit: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  @Min(1)
+  page: number;
 }
