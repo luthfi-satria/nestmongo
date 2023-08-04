@@ -3,6 +3,7 @@ import { UsergroupService } from '../../usergroup/usergroup.service';
 import { Injectable } from '@nestjs/common';
 import { AppmenuService } from '../../appmenu/appmenu.service';
 import { UsersService } from '../../users/users.service';
+import { AppconfigService } from '../../appconfig/appconfig.service';
 
 @Injectable()
 export class SeedingDB {
@@ -10,7 +11,26 @@ export class SeedingDB {
     private readonly usergroupService: UsergroupService,
     private readonly appmenuService: AppmenuService,
     private readonly userService: UsersService,
+    private readonly appconfigService: AppconfigService,
   ) {}
+
+  @Command({
+    command: 'seeding:initial',
+    describe: 'seeding all requirement data',
+  })
+  async initialization() {
+    await this.appconfigService.seeding();
+    await this.usergroupService.seeding();
+  }
+
+  @Command({
+    command: 'seeding:admin',
+    describe: 'seeding admin data',
+  })
+  async createAdmin() {
+    const createAdmin = await this.userService.createAdmin();
+    return createAdmin;
+  }
 
   @Command({
     command: 'seeding:usergroup',
@@ -18,6 +38,15 @@ export class SeedingDB {
   })
   async createGroup() {
     const seeds = await this.usergroupService.seeding();
+    return seeds;
+  }
+
+  @Command({
+    command: 'seeding:config',
+    describe: 'seeding application configuration',
+  })
+  async createAppconfig() {
+    const seeds = await this.appconfigService.seeding();
     return seeds;
   }
 

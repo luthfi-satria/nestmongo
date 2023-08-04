@@ -10,6 +10,7 @@ import { DatetimeHelper } from '../helper/datetime.helper';
 import { Model, Types } from 'mongoose';
 import * as fs from 'fs';
 import { join } from 'path';
+import { RSuccessMessage } from '../response/response.interface';
 
 @Injectable()
 export class UsergroupService {
@@ -20,7 +21,24 @@ export class UsergroupService {
   ) {}
 
   async getAll() {
-    return;
+    try {
+      const findQuery = await this.usergroupRepo.find().sort({ _id: 1 });
+
+      const count = await this.usergroupRepo.count();
+      const results: RSuccessMessage = {
+        success: true,
+        message: 'Get list group success',
+        data: {
+          total: count,
+          items: findQuery,
+        },
+      };
+
+      return results;
+    } catch (err) {
+      Logger.error(err.message, 'Fetch usergroup is failed');
+      throw err;
+    }
   }
 
   async findOne(search: any) {
@@ -170,6 +188,9 @@ export class UsergroupService {
           replacement = await this.usergroupRepo.replaceOne(
             query,
             parseData[items],
+            {
+              upsert: true,
+            },
           );
         }
       }

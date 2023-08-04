@@ -13,6 +13,8 @@ import { FilterQuery, Model } from 'mongoose';
 import { faker } from '@faker-js/faker';
 import { UserType } from '../hash/guard/interface/user.interface';
 import { RSuccessMessage } from '../response/response.interface';
+import { join } from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class UsersService {
@@ -28,6 +30,22 @@ export class UsersService {
 
   async findOne(search: any) {
     return await this.usersRepo.findOne(search).populate('usergroup');
+  }
+
+  async getOne(search: any) {
+    return await this.usersRepo
+      .findOne(search, {
+        _id: 1,
+        name: 1,
+        username: 1,
+        email: 1,
+        phone: 1,
+        user_type: 1,
+        usergroups: 1,
+        created_at: 1,
+        updated_at: 1,
+      })
+      .populate('usergroup');
   }
 
   async register(data: CreateUsersDto) {
@@ -119,7 +137,7 @@ export class UsersService {
   }
 
   async profile(id) {
-    const getProfile = await this.findOne({ _id: id });
+    const getProfile = await this.getOne({ _id: id });
     if (getProfile) {
       return this.responseService.success(true, 'user profile', getProfile);
     }
@@ -132,7 +150,7 @@ export class UsersService {
 
   async update(id, body: Partial<UpdateUserDto>) {
     try {
-      const verifyUser = await this.findOne({ _id: id });
+      const verifyUser = await this.getOne({ _id: id });
       if (verifyUser) {
         // Get usergroup
         const usergroup = await this.groupRepo.findOne({
@@ -281,5 +299,43 @@ export class UsersService {
       Logger.log(error.message, 'Seeding data is aborting, file is not exists');
       throw error;
     }
+  }
+
+  async createAdmin() {
+    const adminData = fs.readFileSync(
+      join(process.cwd(), 'src/database/seeds/data/initial_admin.data.json'),
+      'utf-8',
+    );
+    const data = JSON.parse(adminData);
+    const token = randomUUID();
+    const password = await this.generateHashPassword(data.password);
+    // Get usergroup
+    const usergroup = await this.groupRepo.findOne({
+      name: data.usergroup,
+    });
+
+    if (!usergroup) {
+      return this.responseService.error(
+        HttpStatus.BAD_REQUEST,
+        {
+          value: data.usergroup,
+          property: 'usergroup',
+          constraint: ['Usergroup is not found!'],
+        },
+        'Usergroup is not found',
+      );
+    }
+    const newUser = {
+      ...data,
+      usergroup: usergroup._id,
+      password: password,
+      token_reset_password: token,
+    };
+    console.log(newUser);
+    const query = { email: data.email };
+    const replacement = await this.usersRepo.replaceOne(query, newUser, {
+      upsert: true,
+    });
+    return replacement;
   }
 }

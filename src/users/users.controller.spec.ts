@@ -14,7 +14,7 @@ import { JwtGuard } from '../hash/guard/jwt/jwt.guard';
 describe('UsersController', () => {
   let userController: UsersController;
   const mockUsersService = {
-    findOne: jest.fn(),
+    getOne: jest.fn(),
     findAll: jest.fn(),
     register: jest.fn(),
     profile: jest.fn(),

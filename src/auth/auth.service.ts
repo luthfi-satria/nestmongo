@@ -16,6 +16,7 @@ export class AuthService {
   async createAccessToken(email, password): Promise<string> {
     const user = await this.userService.findOne({ email: email });
     let validate = false;
+
     if (user) {
       validate = await this.validatePassword(password, user.password);
     }

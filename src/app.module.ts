@@ -11,6 +11,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { CommandModule } from 'nestjs-command';
 import { SeedingDB } from './database/seeds/seedings.seed';
 import { AppmenuModule } from './appmenu/appmenu.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { SchedullerService } from './scheduller/scheduller.service';
+import { AppconfigModule } from './appconfig/appconfig.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -18,14 +21,16 @@ import { AppmenuModule } from './appmenu/appmenu.module';
       imports: [ConfigModule],
       useClass: DatabaseService,
     }),
+    ScheduleModule.forRoot(),
     CommandModule,
     UsersModule,
     AuthModule,
     UsergroupModule,
     UsergroupAccessModule,
     AppmenuModule,
+    AppconfigModule,
   ],
   controllers: [AppController],
-  providers: [AppService, SeedingDB],
+  providers: [AppService, SeedingDB, SchedullerService],
 })
 export class AppModule {}

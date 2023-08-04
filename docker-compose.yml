@@ -40,8 +40,22 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: example
       ME_CONFIG_BASICAUTH_USERNAME: admin
       ME_CONFIG_BASICAUTH_PASSWORD: admin
+    volumes:
+      - mongoexpress:/var/lib/mongoexpress/data:rw
     depends_on:
       - mongodb
+    networks:
+      - youapp
+
+
+  redis:
+    image: bitnami/redis:latest
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - redisdata:/bitnami/redis/data:rw
+    ports:
+      - 6379:6379
     networks:
       - youapp
 
@@ -51,4 +65,8 @@ networks:
 
 volumes:
   mongodata:
+    driver: local
+  redisdata:
+    driver: local
+  mongoexpress:
     driver: local

@@ -37,6 +37,12 @@ export class UsersController {
     return this.userService.register(payload);
   }
 
+  @Post('createAdmin')
+  @ResponseStatusCode()
+  async createAdmin() {
+    return this.userService.createAdmin();
+  }
+
   @Get()
   @ResponseStatusCode()
   @UserType('admin')

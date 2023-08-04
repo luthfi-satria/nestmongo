@@ -5,7 +5,7 @@ import { JwtGuard } from '../hash/guard/jwt/jwt.guard';
 import { ResponseService } from '../response/response.service';
 import { MessageService } from '../message/message.service';
 import { GetUsergroupID, UsergroupDto } from './dto/usergroup.dto';
-import { UsergroupDocument } from '../database/entities/usergroup.entity';
+import { Usergroups } from '../database/entities/usergroup.entity';
 
 describe('UsergroupController', () => {
   let usergroupController: UsergroupController;
@@ -46,9 +46,9 @@ describe('UsergroupController', () => {
       name: 'group test',
     } as UsergroupDto;
 
-    const usergroupData: Partial<UsergroupDocument> = {
+    const usergroupData: Partial<Usergroups> = {
       name: 'group test',
-    } as Partial<UsergroupDocument>;
+    } as Partial<Usergroups>;
 
     jest.spyOn(MockUsergroupService, 'create').mockReturnValue(usergroupData);
     const result = await usergroupController.create(usergroup);
@@ -66,9 +66,9 @@ describe('UsergroupController', () => {
       name: 'group test 2',
     } as UsergroupDto;
 
-    const usergroupData: Partial<UsergroupDocument> = {
+    const usergroupData: Partial<Usergroups> = {
       name: 'group test 2',
-    } as Partial<UsergroupDocument>;
+    } as Partial<Usergroups>;
 
     jest.spyOn(MockUsergroupService, 'update').mockReturnValue(usergroupData);
     const result = await usergroupController.update(id, usergroup);
