@@ -14,6 +14,6 @@ export class DBHelper {
     ) {
       return new Types.ObjectId(value);
     }
-    return `${value} is not a valid MongoId, should be use ${key} properties`;
+    return `${value} is not a valid format, should be use ${key} properties`;
   }
 }

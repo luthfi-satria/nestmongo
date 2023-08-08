@@ -9,12 +9,15 @@ import {
 } from '../database/entities/appconfig.entities';
 import { AppconfigService } from './appconfig.service';
 import { AppconfigController } from './appconfig.controller';
-
+import { BullModule } from '@nestjs/bull';
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Appconfig.name, schema: AppconfigSchema },
     ]),
+    BullModule.registerQueue({
+      name: 'AppConfig',
+    }),
   ],
   providers: [AppconfigService, MessageService, ResponseService, JwtService],
   controllers: [AppconfigController],

@@ -14,12 +14,20 @@ import { AppmenuModule } from './appmenu/appmenu.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SchedullerService } from './scheduller/scheduller.service';
 import { AppconfigModule } from './appconfig/appconfig.module';
+import { BullModule } from '@nestjs/bull';
 @Module({
   imports: [
     ConfigModule.forRoot(),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useClass: DatabaseService,
+    }),
+    BullModule.forRoot({
+      redis: {
+        host: process.env.REDIS_HOST,
+        port: Number(process.env.REDIS_PORT),
+        password: process.env.REDIS_PASSWORD,
+      },
     }),
     ScheduleModule.forRoot(),
     CommandModule,

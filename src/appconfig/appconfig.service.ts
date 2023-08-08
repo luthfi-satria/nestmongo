@@ -11,6 +11,8 @@ import { MessageService } from '../message/message.service';
 import { RSuccessMessage } from '../response/response.interface';
 import * as fs from 'fs';
 import { join } from 'path';
+import { Queue } from 'bull';
+import { InjectQueue } from '@nestjs/bull';
 
 @Injectable()
 export class AppconfigService {
@@ -19,6 +21,8 @@ export class AppconfigService {
     private readonly appconfigRepo: Model<AppconfigDocument>,
     private readonly responseService: ResponseService,
     private readonly messageService: MessageService,
+    @InjectQueue('AppConfig')
+    private readonly appconfigQueue: Queue,
   ) {}
 
   async listConfig(param: ListAppconfig) {
@@ -70,6 +74,18 @@ export class AppconfigService {
     return await this.appconfigRepo.findOne(search);
   }
 
+  async getDetailConfig(id) {
+    const getConfig = await this.findOne({ _id: id });
+    if (getConfig) {
+      return this.responseService.success(true, 'user profile', getConfig);
+    }
+    return this.responseService.error(HttpStatus.BAD_REQUEST, {
+      value: id,
+      property: 'config id',
+      constraint: ['userconfiguration is not found'],
+    });
+  }
+
   async update(id, body: AppconfigDto) {
     try {
       const isExists = await this.findOne({ _id: id });
@@ -110,6 +126,45 @@ export class AppconfigService {
     } catch (err) {
       Logger.log(err.message, 'Cannot update configuration');
       throw err;
+    }
+  }
+
+  /**
+   * SYNCHRONIZE
+   * PURPOSE: Registering configuration into redis storages
+   * @returns
+   */
+  async synchronize() {
+    try {
+      const findQuery = await this.appconfigRepo.find().sort({ _id: 1 });
+
+      if (findQuery) {
+        const registerData = {};
+        for (const items of findQuery) {
+          const newIndex = items.ref_id;
+          registerData[`${newIndex}`] = items;
+        }
+        // verify job id for appconfig is exist or not then recreate one
+        const availJob = await this.appconfigQueue.getJob('appconfig');
+
+        if (availJob) {
+          await availJob.remove();
+        }
+
+        const register = await this.appconfigQueue.add(registerData, {
+          jobId: 'appconfig',
+        });
+        return register.data;
+      }
+
+      return this.responseService.error(HttpStatus.BAD_REQUEST, {
+        value: 'configuration data',
+        property: 'configuration',
+        constraint: ['configuration is empty'],
+      });
+    } catch (error) {
+      Logger.log(error.message, 'Synchronize is failed');
+      throw error;
     }
   }
 

@@ -3,6 +3,7 @@ import {
   IsBoolean,
   IsNotEmpty,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   Min,
@@ -31,9 +32,9 @@ export class AppconfigDto {
   @IsNotEmpty()
   scope: scopeConfig;
 
-  @IsString()
+  @IsObject()
   @IsNotEmpty()
-  value: string;
+  value: any;
 
   @IsBoolean()
   @IsNotEmpty()
