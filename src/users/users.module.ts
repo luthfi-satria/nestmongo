@@ -10,6 +10,7 @@ import {
   Usergroups,
   UsergroupsSchema,
 } from '../database/entities/usergroup.entity';
+import { AppconfigModule } from '../appconfig/appconfig.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import {
       { name: Users.name, schema: UserSchema },
       { name: Usergroups.name, schema: UsergroupsSchema },
     ]),
+    AppconfigModule,
   ],
   exports: [UsersService],
   providers: [UsersService, ResponseService, MessageService, JwtService],

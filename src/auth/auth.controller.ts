@@ -5,20 +5,21 @@ import {
   Headers,
   HttpStatus,
   Post,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ResponseService } from '../response/response.service';
-import { MessageService } from '../message/message.service';
 import { AuthJwtGuard } from './auth.decorator';
 import { RMessage } from '../response/response.interface';
 import { ResponseStatusCode } from '../response/response.decorator';
+import { AppconfigInterceptor } from '../appconfig/appconfig.interceptor';
 
 @Controller('auth')
+@UseInterceptors(AppconfigInterceptor)
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly responseService: ResponseService,
-    private readonly messageService: MessageService,
   ) {}
 
   @Post('login')

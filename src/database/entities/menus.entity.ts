@@ -9,7 +9,7 @@ export class Appmenus {
   @Transform(({ value }) => value.toString())
   _id: ObjectId;
 
-  @Prop()
+  @Prop({ unique: true })
   name?: string;
 
   @Prop()

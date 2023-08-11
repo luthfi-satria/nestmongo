@@ -7,6 +7,7 @@ import {
   Put,
   HttpStatus,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
@@ -22,8 +23,10 @@ import { User } from '../auth/auth.decorator';
 import { DBHelper } from '../helper/database.helper';
 import { Types } from 'mongoose';
 import { ResponseService } from '../response/response.service';
+import { AppconfigInterceptor } from '../appconfig/appconfig.interceptor';
 
 @Controller('api/user')
+@UseInterceptors(AppconfigInterceptor)
 @ResponseStatusCode()
 export class UsersController {
   constructor(

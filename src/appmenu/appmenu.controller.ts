@@ -11,7 +11,12 @@ import { ResponseStatusCode } from '../response/response.decorator';
 import { UserType } from '../hash/guard/user-type.decorator';
 import { AuthJwtGuard } from '../auth/auth.decorator';
 import { AppmenuService } from './appmenu.service';
-import { AppmenuDto, GetAppmenuID } from './dto/appmenu.dto';
+import {
+  AppmenuDto,
+  GetAppmenuID,
+  ListAppmenu,
+  UpdateAppmenuDto,
+} from './dto/appmenu.dto';
 
 @Controller('api/appmenu')
 export class AppmenuController {
@@ -30,8 +35,8 @@ export class AppmenuController {
   @UserType('admin')
   @AuthJwtGuard()
   @ResponseStatusCode()
-  async findAll() {
-    return await this.appmenuService.getAll();
+  async findAll(@Param() param: ListAppmenu) {
+    return await this.appmenuService.getAll(param);
   }
 
   @Get(':id')
@@ -39,14 +44,14 @@ export class AppmenuController {
   @AuthJwtGuard()
   @ResponseStatusCode()
   async findOne(@Param() param: GetAppmenuID) {
-    return await this.appmenuService.findOne(param.id);
+    return await this.appmenuService.getDetailMenu(param.id);
   }
 
   @Put(':id')
   @UserType('admin')
   @AuthJwtGuard()
   @ResponseStatusCode()
-  async update(@Param() param: GetAppmenuID, @Body() Body: AppmenuDto) {
+  async update(@Param() param: GetAppmenuID, @Body() Body: UpdateAppmenuDto) {
     return await this.appmenuService.update(param.id, Body);
   }
 

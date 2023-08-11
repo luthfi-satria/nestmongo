@@ -6,14 +6,17 @@ import {
   Get,
   Put,
   Delete,
+  UseInterceptors,
 } from '@nestjs/common';
 import { GetUsergroupID, UsergroupDto } from './dto/usergroup.dto';
 import { UsergroupService } from './usergroup.service';
 import { ResponseStatusCode } from '../response/response.decorator';
 import { UserType } from '../hash/guard/user-type.decorator';
 import { AuthJwtGuard } from '../auth/auth.decorator';
+import { AppconfigInterceptor } from '../appconfig/appconfig.interceptor';
 
 @Controller('api/usergroup')
+@UseInterceptors(AppconfigInterceptor)
 export class UsergroupController {
   constructor(private readonly usergroupService: UsergroupService) {}
 

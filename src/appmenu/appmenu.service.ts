@@ -2,11 +2,12 @@ import { Injectable, Logger, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ResponseService } from '../response/response.service';
 import { DatetimeHelper } from '../helper/datetime.helper';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import * as fs from 'fs';
 import { join } from 'path';
 import { Appmenus, AppmenusDocument } from '../database/entities/menus.entity';
-import { AppmenuDto } from './dto/appmenu.dto';
+import { AppmenuDto, ListAppmenu, UpdateAppmenuDto } from './dto/appmenu.dto';
+import { RSuccessMessage } from '../response/response.interface';
 
 @Injectable()
 export class AppmenuService {
@@ -16,12 +17,65 @@ export class AppmenuService {
     private readonly responseService: ResponseService,
   ) {}
 
-  async getAll() {
-    return;
+  async getAll(param: ListAppmenu) {
+    try {
+      const limit = param.limit || 10;
+      const page = param.page || 1;
+      const skip = (page - 1) * limit;
+      const startId = param.startId || '';
+      const filters: FilterQuery<AppmenusDocument> = startId
+        ? {
+            _id: {
+              $gt: startId,
+            },
+          }
+        : {};
+
+      if (param.searchQuery) {
+        filters.$text = {
+          $search: param.searchQuery,
+        };
+      }
+      const findQuery = await this.appmenuRepo
+        .find(filters)
+        .sort({ _id: 1 })
+        .skip(skip)
+        .limit(limit);
+
+      const count = await this.appmenuRepo.count();
+      const results: RSuccessMessage = {
+        success: true,
+        message: 'Get List application menu success',
+        data: {
+          total: count,
+          page: page,
+          skip: skip,
+          limit: limit,
+          items: findQuery,
+        },
+      };
+
+      return results;
+    } catch (err) {
+      Logger.error(err.message, 'application configs failed to fetch');
+      throw err;
+    }
   }
 
   async findOne(search: any) {
     return await this.appmenuRepo.findOne(search);
+  }
+
+  async getDetailMenu(id) {
+    const getConfig = await this.findOne({ _id: id });
+    if (getConfig) {
+      return this.responseService.success(true, 'application menu', getConfig);
+    }
+    return this.responseService.error(HttpStatus.BAD_REQUEST, {
+      value: id,
+      property: 'menu id',
+      constraint: ['menu is not found'],
+    });
   }
 
   async create(body: AppmenuDto) {
@@ -63,7 +117,7 @@ export class AppmenuService {
     }
   }
 
-  async update(id, body: AppmenuDto) {
+  async update(id, body: UpdateAppmenuDto) {
     try {
       const isExists = await this.findOne({ _id: id });
 
@@ -71,8 +125,8 @@ export class AppmenuService {
         return this.responseService.error(
           HttpStatus.BAD_REQUEST,
           {
-            value: body.name,
-            property: 'name',
+            value: 'id',
+            property: 'id',
             constraint: ['Appmenu is not found!'],
           },
           'Appmenu is not found',
@@ -148,7 +202,7 @@ export class AppmenuService {
   async seeding() {
     try {
       const AppmenuData = fs.readFileSync(
-        join(process.cwd(), 'src/database/seeds/data/Appmenu.data.json'),
+        join(process.cwd(), 'src/database/seeds/data/appmenu.data.json'),
         'utf-8',
       );
 
@@ -156,11 +210,13 @@ export class AppmenuService {
       let replacement;
       if (parseData) {
         for (const items in parseData) {
-          const query = { _id: parseData[items]['_id'] };
-          parseData[items]['_id'] = new Types.ObjectId(parseData[items]['_id']);
+          const query = { name: parseData[items]['name'] };
           replacement = await this.appmenuRepo.replaceOne(
             query,
             parseData[items],
+            {
+              upsert: true,
+            },
           );
         }
       }

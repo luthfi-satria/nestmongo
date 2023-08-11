@@ -77,12 +77,16 @@ export class AppconfigService {
   async getDetailConfig(id) {
     const getConfig = await this.findOne({ _id: id });
     if (getConfig) {
-      return this.responseService.success(true, 'user profile', getConfig);
+      return this.responseService.success(
+        true,
+        'application configuration',
+        getConfig,
+      );
     }
     return this.responseService.error(HttpStatus.BAD_REQUEST, {
       value: id,
       property: 'config id',
-      constraint: ['userconfiguration is not found'],
+      constraint: ['configuration is not found'],
     });
   }
 
@@ -166,6 +170,12 @@ export class AppconfigService {
       Logger.log(error.message, 'Synchronize is failed');
       throw error;
     }
+  }
+
+  async appconfigJobs() {
+    const getJob = await this.appconfigQueue.getJob('appconfig');
+    const appconf = getJob ? getJob.data?.GLOBAL : {};
+    return appconf;
   }
 
   async seeding() {

@@ -9,12 +9,14 @@ import {
   UsergroupsSchema,
 } from '../database/entities/usergroup.entity';
 import { JwtService } from '@nestjs/jwt';
+import { AppconfigModule } from '../appconfig/appconfig.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Usergroups.name, schema: UsergroupsSchema },
     ]),
+    AppconfigModule,
   ],
   providers: [UsergroupService, MessageService, ResponseService, JwtService],
   controllers: [UsergroupController],

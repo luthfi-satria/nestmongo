@@ -8,6 +8,7 @@ import { MessageService } from '../message/message.service';
 import { ResponseService } from '../response/response.service';
 import { HashService } from '../hash/hash.service';
 import { JwtStrategy } from '../hash/guard/jwt/jwt.strategy';
+import { AppconfigModule } from '../appconfig/appconfig.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { JwtStrategy } from '../hash/guard/jwt/jwt.strategy';
       },
     }),
     UsersModule,
+    AppconfigModule,
   ],
   exports: [AuthService],
   controllers: [AuthController],
