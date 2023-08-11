@@ -1,9 +1,22 @@
-import { Controller, Delete, Get, Post, Put } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  Post,
+  Put,
+  Body,
+  Param,
+} from '@nestjs/common';
 import { UsergroupAccessService } from './usergroup_access.service';
 import { ResponseStatusCode } from '../response/response.decorator';
 import { UserType } from '../hash/guard/user-type.decorator';
 import { AuthJwtGuard } from '../auth/auth.decorator';
 import { User } from '../auth/auth.decorator';
+import {
+  GetUsergroupAccessID,
+  ListAccessmenu,
+  UsergroupAccessDto,
+} from './dto/usergroup_access.dto';
 
 @Controller('api/access')
 export class UsergroupAccessController {
@@ -13,31 +26,42 @@ export class UsergroupAccessController {
   @ResponseStatusCode()
   @UserType('admin')
   @AuthJwtGuard()
+  async getAllAccess(@Body() body: ListAccessmenu) {
+    return await this.accessService.getAll(body);
+  }
+
+  @Get('/user')
+  @ResponseStatusCode()
+  @UserType('admin')
+  @AuthJwtGuard()
   async getAccess(@User() user) {
-    return await this.accessService.getAccess();
+    return await this.accessService.getAccess(user);
   }
 
   @Post()
   @ResponseStatusCode()
   @UserType('admin')
   @AuthJwtGuard()
-  async create() {
-    return await this.accessService.create();
+  async create(@Body() body: UsergroupAccessDto) {
+    return await this.accessService.create(body);
   }
 
-  @Put()
+  @Put(':id')
   @ResponseStatusCode()
   @UserType('admin')
   @AuthJwtGuard()
-  async update() {
-    return await this.accessService.update();
+  async update(
+    @Param() param: GetUsergroupAccessID,
+    @Body() body: UsergroupAccessDto,
+  ) {
+    return await this.accessService.update(param.id, body);
   }
 
-  @Delete()
+  @Delete(':id')
   @ResponseStatusCode()
   @UserType('admin')
   @AuthJwtGuard()
-  async delete() {
-    return await this.accessService.delete();
+  async delete(@Param() param: GetUsergroupAccessID) {
+    return await this.accessService.delete(param.id);
   }
 }

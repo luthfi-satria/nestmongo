@@ -19,10 +19,10 @@ export class Useraccess {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Appmenus' })
   @Type(() => Appmenus)
-  menus?: Appmenus;
+  menu?: Appmenus;
 
   @Prop()
-  permission?: string[];
+  permissions?: string[];
 
   @Prop({
     type: 'date',
