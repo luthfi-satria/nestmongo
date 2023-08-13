@@ -17,6 +17,9 @@ export class Useraccess {
   @Type(() => Usergroups)
   usergroup?: Usergroups;
 
+  @Prop()
+  level?: string;
+
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Appmenus' })
   @Type(() => Appmenus)
   menu?: Appmenus;
